@@ -6,10 +6,10 @@ import zipfile
 from config import (
     DOWNLOAD_PATH,
     BUILT_FONTS_PATH,
-    JETBRAINS_MONO_URL,
-    JETBRAINS_MONO_ZIP_NAME,
     D2_CODING_URL,
     D2_CODING_ZIP_NAME,
+    JETBRAINS_MONO_URL,
+    JETBRAINS_MONO_ZIP_NAME,
     JETBRAINS_MONO_NF_URL,  # Added
     JETBRAINS_MONO_NF_ZIP_NAME,  # Added
     USE_SYSTEM_WGET,
@@ -37,7 +37,6 @@ def download_file(url, filename):
         os.system(f"wget {url} -O {filename}")
     else:
         wget.download(url, out=filename)
-    print()  # 줄바꿈
 
 
 def extract_zip(zip_path, extract_to):
@@ -68,8 +67,8 @@ def setup():
         os.path.join(DOWNLOAD_PATH, JETBRAINS_MONO_NF_ZIP_NAME),
     )
 
-    extract_zip(os.path.join(DOWNLOAD_PATH, JETBRAINS_MONO_ZIP_NAME), DOWNLOAD_PATH)
     extract_zip(os.path.join(DOWNLOAD_PATH, D2_CODING_ZIP_NAME), DOWNLOAD_PATH)
+    extract_zip(os.path.join(DOWNLOAD_PATH, JETBRAINS_MONO_ZIP_NAME), DOWNLOAD_PATH)
     extract_zip(os.path.join(DOWNLOAD_PATH, JETBRAINS_MONO_NF_ZIP_NAME), DOWNLOAD_PATH)
 
 

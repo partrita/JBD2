@@ -79,23 +79,23 @@ def build_font():
     for filename in os.listdir(DOWNLOAD_JETBRAINS_TTF_PATH):
         if not filename.lower().endswith(".ttf"):
             continue
-
         src_path = os.path.join(DOWNLOAD_JETBRAINS_TTF_PATH, filename)
         jb_font = fontforge.open(src_path)
         
         # 한글 영역 선택 및 D2 Coding 글리프 붙여넣기
         jb_font.selection.select(("unicode", "ranges"), 0x3131, 0x318E) \
-                   .select(("unicode", "ranges", "more"), 0xAC00, 0xD7A3)
+               .select(("unicode", "ranges", "more"), 0xAC00, 0xD7A3)
         jb_font.paste()
 
         # 메타데이터 업데이트
         style = get_font_style(filename)
         update_font_metadata(jb_font, style)
-        
-        # 파일 출력
-        output_filename = f"{BUILT_FONT_FILENAME_BASE}-{style}.ttf" if style != "Regular" \
-                         else f"{BUILT_FONT_FILENAME_BASE}-Regular.ttf"
-        output_path = os.path.join(BUILT_FONTS_PATH, output_filename)
-        
-        jb_font.generate(output_path)
-        print(f"[INFO] Exported {output_path}")
+        output_filename_base = f"{BUILT_FONT_FILENAME_BASE}-{style}" if style != "Regular" else f"{BUILT_FONT_FILENAME_BASE}-Regular"
+        output_ttf_path = os.path.join(BUILT_FONTS_PATH, output_filename_base + ".ttf")
+        output_woff2_path = os.path.join(BUILT_FONTS_PATH, output_filename_base + ".woff2")
+        # TTF 파일 생성
+        jb_font.generate(output_ttf_path)
+        print(f"[INFO] Exported {output_ttf_path}")
+        # WOFF2 파일 생성 (FontForge에서 직접 지원)
+        jb_font.generate(output_woff2_path)
+        print(f"[INFO] Exported {output_woff2_path}")

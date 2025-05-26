@@ -1,4 +1,4 @@
-name: Build and Release TTF
+name: Build and Release TTF & WOFF2
 
 on:
   push:
@@ -28,9 +28,20 @@ jobs:
         id: ttf_files
         run: echo "files=$(find built_fonts -name '*.ttf' -printf '%p,' 2>/dev/null | sed 's/,$//' || echo '')" >> $GITHUB_OUTPUT
 
+      - name: Find generated WOFF2 files
+        id: woff2_files
+        run: echo "files=$(find built_fonts -name '*.woff2' -printf '%p,' 2>/dev/null | sed 's/,$//' || echo '')" >> $GITHUB_OUTPUT
+
       - name: Upload TTF files to release
         uses: softprops/action-gh-release@v2.2.2
         with:
           files: ${{ steps.ttf_files.outputs.files }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload WOFF2 files to release
+        uses: softprops/action-gh-release@v2.2.2
+        with:
+          files: ${{ steps.woff2_files.outputs.files }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

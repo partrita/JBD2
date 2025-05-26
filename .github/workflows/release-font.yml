@@ -1,0 +1,36 @@
+name: Build and Release TTF
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install FontForge and Python bindings
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fontforge python3-fontforge
+
+      - name: Install Python wget module
+        run: pip install wget
+
+      - name: Build fonts
+        run: python3 build.py all
+
+      - name: Find generated TTF files
+        id: ttf_files
+        run: echo "files=$(find . -name '*.ttf' -printf '%p,' | sed 's/,$//')" >> $GITHUB_OUTPUT
+
+      - name: Upload TTF files to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.ttf_files.outputs.files }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

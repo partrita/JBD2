@@ -71,6 +71,14 @@ def setup():
     extract_zip(os.path.join(DOWNLOAD_PATH, JETBRAINS_MONO_ZIP_NAME), DOWNLOAD_PATH)
     extract_zip(os.path.join(DOWNLOAD_PATH, JETBRAINS_MONO_NF_ZIP_NAME), DOWNLOAD_PATH)
 
+    print("[INFO] Deleting non-Regular ttf files.")
+    for root, dirs, files in os.walk(DOWNLOAD_PATH):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if file.endswith(".ttf") and "Regular" not in file:
+                print(f"  - Deleting: {file_path}")
+                os.remove(file_path)
+
 
 def clean():
     """다운로드 및 출력 파일 삭제"""

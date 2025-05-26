@@ -3,7 +3,7 @@ name: Build and Release TTF
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*.*.*'
   workflow_dispatch:  # 수동 실행 트리거 추가
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
         run: echo "files=$(find . -name '*.ttf' -printf '%p,' | sed 's/,$//')" >> $GITHUB_OUTPUT
 
       - name: Upload TTF files to release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.2.2
         with:
           files: ${{ steps.ttf_files.outputs.files }}
         env:

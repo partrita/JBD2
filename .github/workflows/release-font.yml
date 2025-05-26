@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:  # 수동 실행 트리거 추가
 
 jobs:
   build:

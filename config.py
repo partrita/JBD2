@@ -5,7 +5,6 @@ import os
 # =========================
 DOWNLOAD_PATH = "assets"
 BUILT_FONTS_PATH = "built_fonts"
-BUILT_FONT_FILENAME_BASE = "JBD2"
 USE_SYSTEM_WGET = False
 
 # =========================

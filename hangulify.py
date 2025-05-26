@@ -5,10 +5,10 @@ from config import (
     BUILT_FONTS_PATH,
     DOWNLOAD_JETBRAINS_TTF_PATH,
     SOURCE_D2_CODING_FONT_PATH,
-    BUILT_FONT_FILENAME_BASE,
+    # BUILT_FONT_FILENAME_BASE, # 더 이상 사용하지 않음
     JETBRAINS_MONO_WIDTH,
-    DOWNLOAD_JETBRAINS_MONO_NF_TTF_PATH,  # Added
-    JETBRAINS_MONO_NF_WIDTH,  # Added
+    DOWNLOAD_JETBRAINS_MONO_NF_TTF_PATH,
+    JETBRAINS_MONO_NF_WIDTH,
 )
 
 BEARING_ADJUSTMENT = 200  # 측면 여백 조정 값
@@ -51,6 +51,9 @@ def get_font_style(original_filename):
     """원본 파일명에서 스타일 추출"""
     base_name = os.path.splitext(original_filename)[0]
     style_parts = base_name.split("-")
+    # 파일명에 'Regular'가 포함된 경우를 명확하게 처리
+    if "Regular" in base_name:
+        return "Regular"
     return style_parts[-1] if len(style_parts) > 1 else "Regular"
 
 
@@ -66,19 +69,27 @@ def format_style_name(style):
 
 def update_font_metadata(font, style):
     """폰트 메타데이터 업데이트"""
-    # 기본 정보 설정
-    font.familyname = BUILT_FONT_FILENAME_BASE
+    original_family_name = font.familyname
+    new_family_name = original_family_name.replace("JetBrains Mono", "JBD2")
+    new_family_name = new_family_name.replace(
+        "JetBrainsMono", "JBD2"
+    )  # 혹시 띄어쓰기 없는 경우 대비
+
+    font.familyname = new_family_name
     formatted_style = format_style_name(style)
 
-    # 파일명 생성
-    font.fontname = f"{BUILT_FONT_FILENAME_BASE}-{style}"
-    font.fullname = f"{BUILT_FONT_FILENAME_BASE} {formatted_style}"
-
-    # SFNT 테이블 업데이트
-    font.appendSFNTName("English (US)", "Preferred Family", font.familyname)
-    font.appendSFNTName("English (US)", "Family", font.familyname)
+    # fontname, fullname, PSName 업데이트
+    font.fontname = f"{new_family_name}-{style}"
+    font.fullname = f"{new_family_name} {formatted_style}"
+    font.appendSFNTName("English (US)", "Preferred Family", new_family_name)
+    font.appendSFNTName("English (US)", "Family", new_family_name)
     font.appendSFNTName("English (US)", "Compatible Full", font.fullname)
     font.appendSFNTName("English (US)", "SubFamily", formatted_style)
+
+    # PostScript 이름도 업데이트 (fontname과 동일하게 설정하는 경우가 많음)
+    font.fontname = f"{new_family_name}-{style}"
+    font.fullname = f"{new_family_name} {formatted_style}"
+    font.appendSFNTName("English (US)", "PostScript Name", font.fontname)
 
 
 def build_font():
@@ -115,11 +126,10 @@ def build_font():
             # 메타데이터 업데이트
             style = get_font_style(filename)
             update_font_metadata(jb_font, style)
-            output_filename_base = (
-                f"{BUILT_FONT_FILENAME_BASE}-{style}"
-                if style != "Regular"
-                else f"{BUILT_FONT_FILENAME_BASE}-Regular"
-            )
+
+            # 새로운 파일명 생성
+            # 폰트의 실제 familyname과 style을 사용하여 파일명 구성
+            output_filename_base = f"{jb_font.familyname.replace(' ', '')}-{style}"
             output_ttf_path = os.path.join(
                 BUILT_FONTS_PATH, output_filename_base + ".ttf"
             )

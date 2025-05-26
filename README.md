@@ -1,7 +1,7 @@
 # JetBrainsMonoHangul
 
 <div align="center">
-![](./static/sample-invert.png)
+![]("./static/sample-invert.png")
 </div>
 
 [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono)에 [D2Coding](https://github.com/naver/d2codingfont)의 한글 영역 (U+3131-U+318E, U+AC00-U+D7A3)을 덧씌운 뒤 폭을 조정한 폰트입니다. [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts)도 릴리즈에 포함되어 있습니다.

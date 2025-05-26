@@ -1,103 +1,103 @@
-import zipfile
 import os
-import shutil
 import sys
+import shutil
+import zipfile
 
 from config import (
-    download_path,
-    built_fonts_path, # Updated from out_path
-    jetbrains_mono_url,
-    jetbrains_mono_name,
-    d2_coding_url,
-    d2_coding_name,
-    use_system_wget,
-    # The following are not directly used in build.py but are good to list if we were stricter
-    # jetbrains_mono_version, d2_coding_version, d2_coding_date,
-    # download_jetbrains_ttf_path, source_d2_coding_font_path,
-    # built_font_filename_base, jetbrains_mono_width
+    DOWNLOAD_PATH,
+    BUILT_FONTS_PATH,
+    JETBRAINS_MONO_URL,
+    JETBRAINS_MONO_ZIP_NAME,
+    D2_CODING_URL,
+    D2_CODING_ZIP_NAME,
+    USE_SYSTEM_WGET,
 )
 from hangulify import build_font
 
-if not use_system_wget:
+if not USE_SYSTEM_WGET:
     import wget
 
-def usage():
-    print(f'python {sys.argv[0]} <subcommand>')
-    print(f'')
-    print(f'subcommand:')
-    print(f'    all: automatically setup and build fonts.')
-    print(f'    setup: download needed files and extract from zip.')
-    print(f'    build: outputs merged fonts.')
-    print(f'    clean: remove all output files including downloaded files.')
+def print_usage():
+    """사용법 안내 메시지 출력"""
+    print(f'python {sys.argv[0]} <subcommand>\n')
+    print('subcommand:')
+    print('    all    : 자동으로 setup 및 폰트 빌드')
+    print('    setup  : 폰트 파일 다운로드 및 압축 해제')
+    print('    build  : 폰트 병합 및 출력')
+    print('    clean  : 다운로드 및 출력 파일 삭제')
 
-if len(sys.argv) == 1:
-    usage()
-    exit(1)
+def download_file(url, filename):
+    """파일 다운로드 (wget 또는 시스템 명령어 사용)"""
+    print(f'[INFO] Download {filename}')
+    if USE_SYSTEM_WGET:
+        os.system(f'wget {url} -O {filename}')
+    else:
+        wget.download(url, out=filename)
+    print()  # 줄바꿈
 
-subcommand = sys.argv[1]
+def extract_zip(zip_path, extract_to):
+    """zip 파일 압축 해제"""
+    print(f'[INFO] Extract {os.path.basename(zip_path)}')
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_to)
 
 def setup():
+    """폰트 파일 다운로드 및 압축 해제"""
     print('[INFO] Download font files')
+    download_file(JETBRAINS_MONO_URL, JETBRAINS_MONO_ZIP_NAME)
+    download_file(D2_CODING_URL, D2_CODING_ZIP_NAME)
 
-    print('[INFO] Download JetBrains Mono')
-    if not use_system_wget:
-        wget.download(jetbrains_mono_url, out=jetbrains_mono_name);
-    else:
-        os.system(f'wget {jetbrains_mono_url} -O {jetbrains_mono_name}')
-    print()
+    if not os.path.exists(DOWNLOAD_PATH):
+        print(f'[INFO] Create directory: {DOWNLOAD_PATH}')
+        os.makedirs(DOWNLOAD_PATH)
 
-    print('[INFO] Download D2 Coding')
-    if not use_system_wget:
-        wget.download(d2_coding_url, out=d2_coding_name);
-    else:
-        os.system(f'wget {d2_coding_url} -O {d2_coding_name}')
-    print()
+    print('[INFO] Move downloaded files to assets directory')
+    shutil.move(JETBRAINS_MONO_ZIP_NAME, os.path.join(DOWNLOAD_PATH, JETBRAINS_MONO_ZIP_NAME))
+    shutil.move(D2_CODING_ZIP_NAME, os.path.join(DOWNLOAD_PATH, D2_CODING_ZIP_NAME))
 
-    if not os.path.exists(download_path):
-        print(f'[INFO] Make \'{download_path}\' directory')
-        os.makedirs(download_path)
-
-    print('[INFO] Move downloaded font files into assets directory')
-    shutil.move(f'./{jetbrains_mono_name}', f'{download_path}/')
-    shutil.move(f'./{d2_coding_name}', f'{download_path}/')
-
-    print('[INFO] Extract JetBrains Mono from zip file')
-    with zipfile.ZipFile(f'{download_path}/{jetbrains_mono_name}', 'r') as zip_ref:
-        zip_ref.extractall(download_path)
-
-    print('[INFO] Extract D2 Coding from zip file')
-    with zipfile.ZipFile(f'{download_path}/{d2_coding_name}', 'r') as zip_ref:
-        zip_ref.extractall(download_path)
+    extract_zip(os.path.join(DOWNLOAD_PATH, JETBRAINS_MONO_ZIP_NAME), DOWNLOAD_PATH)
+    extract_zip(os.path.join(DOWNLOAD_PATH, D2_CODING_ZIP_NAME), DOWNLOAD_PATH)
 
 def clean():
+    """다운로드 및 출력 파일 삭제"""
     print('[INFO] Remove downloaded files')
-    if os.path.exists(download_path):
-        shutil.rmtree(download_path)
+    if os.path.exists(DOWNLOAD_PATH):
+        shutil.rmtree(DOWNLOAD_PATH)
     else:
-        print(f'[INFO] Directory \'{download_path}\' not found, skipping.')
+        print(f'[INFO] Directory "{DOWNLOAD_PATH}" not found, skipping.')
 
     print('[INFO] Remove output files')
-    if os.path.exists(built_fonts_path): # Changed from out_path
-        shutil.rmtree(built_fonts_path)
+    if os.path.exists(BUILT_FONTS_PATH):
+        shutil.rmtree(BUILT_FONTS_PATH)
     else:
-        print(f'[INFO] Directory \'{built_fonts_path}\' not found, skipping.')
+        print(f'[INFO] Directory "{BUILT_FONTS_PATH}" not found, skipping.')
 
-if subcommand == 'all':
-    print('[INFO] Remove remaining files')
-    try:
+def main():
+    if len(sys.argv) == 1:
+        print_usage()
+        exit(1)
+
+    subcommand = sys.argv[1]
+
+    if subcommand == 'all':
+        print('[INFO] Clean up previous files')
+        try:
+            clean()
+        except Exception:
+            print('[INFO] No output files found.')
+        print('[INFO] Download and extract font files')
+        setup()
+        print('[INFO] Build fonts')
+        build_font()
+    elif subcommand == 'setup':
+        setup()
+    elif subcommand == 'build':
+        build_font()
+    elif subcommand == 'clean':
         clean()
-    except:
-        print('[INFO] No output files found.')
-    print('[INFO] Download and extract from zip')
-    setup()
-    print('[INFO] Build fonts')
-    build_font()
-elif subcommand == 'setup':
-    setup()
-elif subcommand == 'build':
-    build_font()
-elif subcommand == 'clean':
-    clean()
-else:
-    usage()
-    exit(1)
+    else:
+        print_usage()
+        exit(1)
+
+if __name__ == '__main__':
+    main()

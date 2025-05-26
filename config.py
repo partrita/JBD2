@@ -1,29 +1,40 @@
 import os
 
-download_path = 'assets'
-built_fonts_path = 'built_fonts' # Renamed from out_path
+# =========================
+# D2Coding Font Configuration
+# =========================
+D2_CODING_VERSION = '1.3.2'
+D2_CODING_DATE = '20180524'
+D2_CODING_URL = (
+    f'https://github.com/naver/d2codingfont/releases/download/VER{D2_CODING_VERSION}/'
+    f'D2Coding-Ver{D2_CODING_VERSION}-{D2_CODING_DATE}.zip'
+)
+D2_CODING_ZIP_NAME = 'D2_Coding.zip'
+D2_CODING_WIDTH = 1000
 
-# --- New variables for specific font locations ---
-# Path to the directory where JetBrains Mono TTF files are extracted
-download_jetbrains_ttf_path = os.path.join(download_path, 'fonts', 'ttf')
-# Path to the D2 Coding TTF file
-source_d2_coding_font_path = os.path.join(download_path, 'D2Coding', f'D2Coding-Ver{d2_coding_version}-{d2_coding_date}.ttf') # d2_coding_version and d2_coding_date will be substituted
-# --- End new variables ---
+# =========================
+# JetBrains Mono Font Configuration
+# =========================
+JETBRAINS_MONO_VERSION = '2.304'
+JETBRAINS_MONO_URL = (
+    f'https://github.com/JetBrains/JetBrainsMono/releases/download/v{JETBRAINS_MONO_VERSION}/'
+    f'JetBrainsMono-{JETBRAINS_MONO_VERSION}.zip'
+)
+JETBRAINS_MONO_ZIP_NAME = 'JetBrains_Mono.zip'
+JETBRAINS_MONO_WIDTH = 1200
 
-# Output filename base
-built_font_filename_base = "JBD2"
+# =========================
+# Build & Path Configuration
+# =========================
+DOWNLOAD_PATH = 'assets'
+BUILT_FONTS_PATH = 'built_fonts'
+BUILT_FONT_FILENAME_BASE = 'JBD2'
+USE_SYSTEM_WGET = False
 
-jetbrains_mono_version = '2.304'
-d2_coding_version = '1.3.2'
-d2_coding_date = '20180524'
+# Path to extracted JetBrains Mono TTF files
+DOWNLOAD_JETBRAINS_TTF_PATH = os.path.join(DOWNLOAD_PATH, 'fonts', 'ttf')
 
-jetbrains_mono_url = f'https://github.com/JetBrains/JetBrainsMono/releases/download/v{jetbrains_mono_version}/JetBrainsMono-{jetbrains_mono_version}.zip'
-d2_coding_url = f'https://github.com/naver/d2codingfont/releases/download/VER{d2_coding_version}/D2Coding-Ver{d2_coding_version}-{d2_coding_date}.zip'
-
-jetbrains_mono_name = 'JetBrains_Mono.zip'
-d2_coding_name = 'D2_Coding.zip'
-
-d2_coding_width = 1000
-jetbrains_mono_width = 1200
-
-use_system_wget = False
+# Path to D2 Coding TTF file
+SOURCE_D2_CODING_FONT_PATH = os.path.join(
+    DOWNLOAD_PATH, 'D2Coding', f'D2Coding-Ver{D2_CODING_VERSION}-{D2_CODING_DATE}.ttf'
+)

@@ -27,7 +27,7 @@ jobs:
 
       - name: Find generated TTF files
         id: ttf_files
-        run: echo "files=$(find . -name '*.ttf' -printf '%p,' | sed 's/,$//')" >> $GITHUB_OUTPUT
+        run: echo "files=$(find built_fonts -name '*.ttf' -printf '%p,' 2>/dev/null | sed 's/,$//' || echo '')" >> $GITHUB_OUTPUT
 
       - name: Upload TTF files to release
         uses: softprops/action-gh-release@v2.2.2

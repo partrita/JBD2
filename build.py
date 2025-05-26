@@ -3,7 +3,19 @@ import os
 import shutil
 import sys
 
-from config import *
+from config import (
+    download_path,
+    built_fonts_path, # Updated from out_path
+    jetbrains_mono_url,
+    jetbrains_mono_name,
+    d2_coding_url,
+    d2_coding_name,
+    use_system_wget,
+    # The following are not directly used in build.py but are good to list if we were stricter
+    # jetbrains_mono_version, d2_coding_version, d2_coding_date,
+    # download_jetbrains_ttf_path, source_d2_coding_font_path,
+    # built_font_filename_base, jetbrains_mono_width
+)
 from hangulify import build_font
 
 if not use_system_wget:
@@ -59,10 +71,16 @@ def setup():
 
 def clean():
     print('[INFO] Remove downloaded files')
-    shutil.rmtree(download_path)
+    if os.path.exists(download_path):
+        shutil.rmtree(download_path)
+    else:
+        print(f'[INFO] Directory \'{download_path}\' not found, skipping.')
 
     print('[INFO] Remove output files')
-    shutil.rmtree(out_path)
+    if os.path.exists(built_fonts_path): # Changed from out_path
+        shutil.rmtree(built_fonts_path)
+    else:
+        print(f'[INFO] Directory \'{built_fonts_path}\' not found, skipping.')
 
 if subcommand == 'all':
     print('[INFO] Remove remaining files')

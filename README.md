@@ -12,9 +12,16 @@
 
 ## 다운로드
 
-release 파일에서 `ttf`파일을 다운로드 할 수 있습니다.
+release 파일에서 `ttf`파일을 다운로드 할 수 있습니다. 파일명에 대한 설명은 아래를 참고하세요.
 
-## 로컬 환경에서 직접 build
+- `JBD2-Regular.ttf` : 일반 글꼴
+- `JBD2-Regular.woff2` : 웹폰트용 글꼴
+- `JBD2NF-Regular.ttf` : NF는 Nerd Font의 약자로, 일반 폰트와 icon 폰트를 의미.
+- `JBD2NFM-Regular.ttf` : NFM은 Nerd Font Mono의 약자로, 고정폭 폰트를 의미.
+- `JBD2NFP-Regular.ttf` :NFP는 Nerd Font Propo의 약자로, Proportional Font(비등폭 글꼴)을 의미합니다. 이는 일반적인 문장이나 GUI, 발표 자료 등과 같이 글자의 폭이 다른 경우에 적합합니다.
+- `JBD2NL-Regular.ttf`: NL은 JetBrains에서 개발자를 위해 만든 서체인 JetBrains Mono에서 이음자(ligature) 기능을 제거한 버전입니다.
+
+## 로컬 환경에서 직접 빌드하기
 
 > 로컬 시스템에 설치하는 것은 추천하지 않습니다. 대신 Docker를 사용하세요.
 

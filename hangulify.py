@@ -91,6 +91,9 @@ def build_font():
     process_hangul_glyphs(d2_font)
     d2_font.copy()
 
+    # FontForge에게 특정 경고를 무시하도록 지시 (전역 설정)
+    fontforge.setPrefs("DontWarnAboutGlyphNameMismatch", 1)
+
     # JetBrains 폰트 병합
     for download_path in [
         DOWNLOAD_JETBRAINS_TTF_PATH,
@@ -126,9 +129,22 @@ def build_font():
             output_woff2_path = os.path.join(
                 BUILT_FONTS_PATH, output_filename_base + ".woff2"
             )
+
             # TTF 파일 생성
-            jb_font.generate(output_ttf_path)
-            print(f"[INFO] Exported {output_ttf_path}")
-            # WOFF2 파일 생성 (FontForge에서 직접 지원)
-            jb_font.generate(output_woff2_path)
-            print(f"[INFO] Exported {output_woff2_path}")
+            try:
+                jb_font.generate(output_ttf_path)
+                print(f"[INFO] Exported {output_ttf_path}")
+            except Exception as e:
+                print(f"[ERROR] Failed to generate TTF for {filename}: {e}")
+
+            # WOFF2 파일 생성
+            try:
+                jb_font.generate(output_woff2_path)
+                print(f"[INFO] Exported {output_woff2_path}")
+            except Exception as e:
+                print(f"[ERROR] Failed to generate WOFF2 for {filename}: {e}")
+
+            jb_font.close()  # 폰트 객체 닫기 (메모리 관리)
+
+    # 모든 처리가 끝난 후 D2 Coding 폰트 객체 닫기
+    d2_font.close()

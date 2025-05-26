@@ -86,11 +86,6 @@ def update_font_metadata(font, style):
     font.appendSFNTName("English (US)", "Compatible Full", font.fullname)
     font.appendSFNTName("English (US)", "SubFamily", formatted_style)
 
-    # PostScript 이름도 업데이트 (fontname과 동일하게 설정하는 경우가 많음)
-    font.fontname = f"{new_family_name}-{style}"
-    font.fullname = f"{new_family_name} {formatted_style}"
-    font.appendSFNTName("English (US)", "PostScript Name", font.fontname)
-
 
 def build_font():
     """메인 폰트 빌드 프로세스"""

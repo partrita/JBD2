@@ -91,9 +91,6 @@ def build_font():
     process_hangul_glyphs(d2_font)
     d2_font.copy()
 
-    # FontForge에게 특정 경고를 무시하도록 지시 (전역 설정)
-    fontforge.setPrefs("DontWarnAboutGlyphNameMismatch", 1)
-
     # JetBrains 폰트 병합
     for download_path in [
         DOWNLOAD_JETBRAINS_TTF_PATH,

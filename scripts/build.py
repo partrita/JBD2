@@ -14,7 +14,7 @@ from config import (
     JETBRAINS_MONO_NF_ZIP_NAME,  # Added
     USE_SYSTEM_WGET,
 )
-from hangulify import build_font
+from src.JBD2.hangulify import build_font
 
 if not USE_SYSTEM_WGET:
     import wget

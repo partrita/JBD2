@@ -1,8 +1,6 @@
 # JetBrainsMonoHangul
 
-<div align="center">
-![]("./static/sample-invert.png")
-</div>
+![](./static/sample-invert.png)
 
 [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono)에 [D2Coding](https://github.com/naver/d2codingfont)의 한글 영역 (U+3131-U+318E, U+AC00-U+D7A3)을 덧씌운 뒤 폭을 조정한 폰트입니다. [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts)도 릴리즈에 포함되어 있습니다.
 
@@ -23,16 +21,33 @@ release 파일에서 `ttf`파일을 다운로드 할 수 있습니다. 파일명
 
 ## 로컬 환경에서 직접 빌드하기
 
-> 로컬 시스템에 설치하는 것은 추천하지 않습니다. 대신 Docker를 사용하세요.
+Docker를 사용하세요.
+
+1. Repo 복사: 
 
 ```bash
-sudo apt install python3-fontforge
-gh repo clone partrita/JetBrainsMonoHangul
-cd JetBrainsMonoHangul
-python build.py all
+gh repo clone partrita/JBD2
+cd JBD2
+``` 
+
+2. Docker 이미지 빌드 (이미지 이름을 JBD2로 지정):
+
+```bash
+docker build -t JBD2 .
 ```
 
-- `fontforge`는 pip에서 제공하지 않으므로 외부 패키지로 설치해야 합니다.
+3. 빌드한 이미지를 bash로 실행 (인터랙티브 모드): 
+
+```bash
+docker run -it -v "$(pwd)":/app JBD2
+```
+
+4. 실행된 Docker 이미지 안에서 명령어를 실행합니다.
+
+- `python build.py all`: 자동으로 setup 및 폰트 빌드
+- `python build.py setup`: 폰트 파일 다운로드 및 압축 해제
+- `python build.py build`: 폰트 병합 및 출력
+- `python build.py clean`: 다운로드 및 출력 파일 삭제
 
 ## Config 파일 설명
 

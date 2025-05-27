@@ -1,8 +1,11 @@
-# JetBrainsMonoHangul
+# JBD2 - JetBrains Mono Hangul
 
-![](./static/sample-invert.png)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/partrita/JBD2?style=flat-square)]
 
-[JetBrains Mono](https://github.com/JetBrains/JetBrainsMono)에 [D2Coding](https://github.com/naver/d2codingfont)의 한글 영역 (U+3131-U+318E, U+AC00-U+D7A3)을 덧씌운 뒤 폭을 조정한 폰트입니다. [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts)도 릴리즈에 포함되어 있습니다.
+![](./static/screenshot.png)
+
+- [JetBrains Mono](https://github.com/JetBrains/JetBrainsMono)에 [D2Coding](https://github.com/naver/d2codingfont)의 한글 영역 (U+3131-U+318E, U+AC00-U+D7A3)을 덧씌운 뒤 폭을 조정한 폰트입니다.
+- [Nerd Fonts](https://github.com/ryanoasis/nerd-fonts)도 릴리즈에 포함되어 있습니다.
 
 > 본래 이름을 JetBrains D2정도로 지으려고 했으나 D2Coding이 RFN 라이선스를 사용하는 바람에 JetBrains Mono Hangul로 이름을 지었습니다.
 
@@ -10,25 +13,28 @@
 
 ## 다운로드
 
+
+![](./static/sample-invert.png)
+
 release 파일에서 `ttf`파일을 다운로드 할 수 있습니다. 파일명에 대한 설명은 아래를 참고하세요.
 
 - `JBD2-Regular.ttf` : 일반 글꼴
 - `JBD2-Regular.woff2` : 웹폰트용 글꼴
-- `JBD2NF-Regular.ttf` : NF는 Nerd Font의 약자로, 일반 폰트와 icon 폰트를 의미.
+- `JBD2NF-Regular.ttf` Í: NF는 Nerd Font의 약자로, 일반 폰트와 icon 폰트를 의미.
 - `JBD2NFM-Regular.ttf` : NFM은 Nerd Font Mono의 약자로, 고정폭 폰트를 의미.
 - `JBD2NFP-Regular.ttf` :NFP는 Nerd Font Propo의 약자로, Proportional Font(비등폭 글꼴)을 의미합니다. 이는 일반적인 문장이나 GUI, 발표 자료 등과 같이 글자의 폭이 다른 경우에 적합합니다.
 - `JBD2NL-Regular.ttf`: NL은 JetBrains에서 개발자를 위해 만든 서체인 JetBrains Mono에서 이음자(ligature) 기능을 제거한 버전입니다.
 
-## 로컬 환경에서 직접 빌드하기
+## 직접 빌드하기
 
 Docker를 사용하세요.
 
-1. Repo 복사: 
+1. Repo 복사:
 
 ```bash
 gh repo clone partrita/JBD2
 cd JBD2
-``` 
+```
 
 2. Docker 이미지 빌드 (이미지 이름을 JBD2로 지정):
 
@@ -36,7 +42,7 @@ cd JBD2
 docker build -t JBD2 .
 ```
 
-3. 빌드한 이미지를 bash로 실행 (인터랙티브 모드): 
+3. 빌드한 이미지를 bash로 실행 (인터랙티브 모드):
 
 ```bash
 docker run -it -v "$(pwd)":/app JBD2
@@ -49,7 +55,7 @@ docker run -it -v "$(pwd)":/app JBD2
 - `python build.py build`: 폰트 병합 및 출력
 - `python build.py clean`: 다운로드 및 출력 파일 삭제
 
-## Config 파일 설명
+## Config 설명
 
 아래는 config.py에 정의된 각 변수의 의미와 역할을 설명한 내용입니다.
 
@@ -124,6 +130,6 @@ docker run -it -v "$(pwd)":/app JBD2
   D2Coding 폰트의 TTF 파일이 위치하는 경로입니다.
   예시: `'assets/D2Coding/D2Coding-Ver1.3.2-20180524.ttf'`
 
-## License
+# License
 
 OFL하에 배포됩니다. 자세한 것은 LICENSE 파일을 참조해주세요.

@@ -2,6 +2,10 @@
 name = "JBD2"
 version = "1.0.3"
 description = "JetBrains Mono에 D2Coding의 한글 영역을 덧씌운 뒤 폭을 조정한 폰트입니다. Nerd Fonts도 포함되어 있습니다."
+authors = [
+    {name = "Janghyub Seo", email = "jhyub06@gmail.com"},
+    {name = "Taeyoon Kim", email = "deepthough@gmail.com"}
+]
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

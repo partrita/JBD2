@@ -17,10 +17,10 @@ jobs:
       - name: Install FontForge and Python bindings
         run: |
           sudo apt-get update
-          sudo apt-get install -y fontforge python3-fontforge
+          sudo apt-get install -y fontforge python3-fontforge wget
 
-      - name: Install Python wget module
-        run: pip install wget
+      # - name: Install Python wget module
+      #   run: pip install wget
 
       - name: Build fonts
         run: python3 build.py all

@@ -247,7 +247,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# 생성된 파일
+# Project-specific ignored files
 assets/
-out/
+built_fonts/
 *.zip

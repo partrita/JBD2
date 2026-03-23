@@ -1,14 +1,15 @@
-name: Build and Release TTF & WOFF2
+name: Build and Release JBD2 Fonts
 
 on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60 # Consider increasing timeout
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repository
@@ -19,30 +20,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y fontforge python3-fontforge wget
 
-      # - name: Install Python wget module
-      #   run: pip install wget
-
       - name: Build fonts
-        run: python3 build.py all
+        run: python3 -m src.build all
 
-      - name: Find generated TTF files
-        id: ttf_files
-        run: echo "files=$(find built_fonts -name '*.ttf' -printf '%p,' 2>/dev/null | sed 's/,$//' || echo '')" >> $GITHUB_OUTPUT
-
-      - name: Find generated WOFF2 files
-        id: woff2_files
-        run: echo "files=$(find built_fonts -name '*.woff2' -printf '%p,' 2>/dev/null | sed 's/,$//' || echo '')" >> $GITHUB_OUTPUT
-
-      - name: Upload TTF files to release
-        uses: softprops/action-gh-release@v2.2.2
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ${{ steps.ttf_files.outputs.files }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload WOFF2 files to release
-        uses: softprops/action-gh-release@v2.2.2
-        with:
-          files: ${{ steps.woff2_files.outputs.files }}
+          files: |
+            built_fonts/*.ttf
+            built_fonts/*.woff2
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

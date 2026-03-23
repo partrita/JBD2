@@ -10,6 +10,7 @@ from .config import (
     ENGLISH_FONT_NF_WIDTH,
     ENGLISH_FONT_WIDTH,
     KOREAN_FONT_PATH,
+    KOREAN_FONT_WIDTH,
 )
 
 # Value to adjust the side bearings of the glyphs.
@@ -28,24 +29,17 @@ def process_hangul_glyphs(font: fontforge.font) -> None:
     font.selection.select(("unicode", "ranges"), 0x3131, 0x318E)
     font.selection.select(("unicode", "ranges", "more"), 0xAC00, 0xD7A3)
 
-    for glyph_id in font.selection.byGlyphs:
-        glyph = font[glyph_id]
-        is_jetbrains_font = int(glyph.width) in (
-            ENGLISH_FONT_WIDTH,
-            ENGLISH_FONT_NF_WIDTH,
-        )
+    for glyph in font.selection.byGlyphs:
+        is_korean_font = int(glyph.width) == KOREAN_FONT_WIDTH
 
         if not glyph.references:
-            if is_jetbrains_font:
+            if is_korean_font:
                 adjust_glyph_bearing(glyph, BEARING_ADJUSTMENT)
         else:
             for ref in glyph.references:
                 ref_glyph = font[ref[0]]
-                is_jetbrains_font_ref = int(ref_glyph.width) in (
-                    ENGLISH_FONT_WIDTH,
-                    ENGLISH_FONT_NF_WIDTH,
-                )
-                if is_jetbrains_font_ref:
+                is_korean_font_ref = int(ref_glyph.width) == KOREAN_FONT_WIDTH
+                if is_korean_font_ref:
                     adjust_glyph_bearing(ref_glyph, BEARING_ADJUSTMENT)
 
 
@@ -121,12 +115,17 @@ def generate_font_files(font: fontforge.font, style: str) -> None:
         print(f"[ERROR] Failed to generate WOFF2 for {font.fontname}: {e}")
 
 
-def process_font_file(font_path: str, is_nerd_font: bool) -> None:
+def process_font_file(font_path: str, is_nerd_font: bool, d2_font: fontforge.font) -> None:
     """Merge Hangul glyphs into a single English font file and update its metadata."""
     font = fontforge.open(font_path)
 
     if is_nerd_font:
         fix_nerd_font_mappings(font)
+
+    # Re-select the Hangul ranges in d2_font and copy them to ensure clipboard is fresh.
+    d2_font.selection.select(("unicode", "ranges"), 0x3131, 0x318E)
+    d2_font.selection.select(("unicode", "ranges", "more"), 0xAC00, 0xD7A3)
+    d2_font.copy()
 
     # Re-select the Hangul ranges and paste the copied glyphs from D2Coding.
     font.selection.select(("unicode", "ranges"), 0x3131, 0x318E)
@@ -144,10 +143,9 @@ def build_fonts() -> None:
     """Main process: Process D2Coding font and merge it with JetBrains Mono files."""
     os.makedirs(BUILT_FONTS_PATH, exist_ok=True)
 
-    # Open D2Coding and prepare Hangul glyphs to be copied.
+    # Open D2Coding and prepare Hangul glyphs.
     d2_font = fontforge.open(KOREAN_FONT_PATH)
     process_hangul_glyphs(d2_font)
-    d2_font.copy()
 
     # Define directories to scan for fonts to merge.
     fonts_to_process: List[Tuple[str, bool]] = [
@@ -163,6 +161,6 @@ def build_fonts() -> None:
         for filename in os.listdir(dir_path):
             if filename.lower().endswith(".ttf"):
                 full_path = os.path.join(dir_path, filename)
-                process_font_file(full_path, is_nerd_font)
+                process_font_file(full_path, is_nerd_font, d2_font)
 
     d2_font.close()

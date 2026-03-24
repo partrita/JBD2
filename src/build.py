@@ -69,10 +69,17 @@ def setup() -> None:
     ]
 
     # Concurrently download font archives directly to DOWNLOAD_PATH.
+    for _, path in archives_info:
+        if os.path.exists(path):
+            os.remove(path)
+
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(download_file, url, path) for url, path in archives_info]
-        for future in concurrent.futures.as_completed(futures):
+        future_to_path = {executor.submit(download_file, url, path): path for url, path in archives_info}
+        for future in concurrent.futures.as_completed(future_to_path):
             future.result()
+            archive_path = future_to_path[future]
+            if not os.path.exists(archive_path) or not zipfile.is_zipfile(archive_path):
+                raise RuntimeError(f"Download failed or produced invalid archive: {archive_path}")
 
     # Concurrently extract all archives.
     with concurrent.futures.ThreadPoolExecutor() as executor:

@@ -1,5 +1,6 @@
 import os
 import shutil
+import subprocess
 import sys
 import zipfile
 from typing import NoReturn
@@ -40,7 +41,7 @@ def download_file(url: str, filename: str) -> None:
     """Download a file from a URL using wget or the system's wget command."""
     print(f"[INFO] Downloading {filename}...")
     if USE_SYSTEM_WGET:
-        result = os.system(f"wget -q {url} -O {filename}")
+        result = subprocess.run(["wget", "-q", url, "-O", filename]).returncode
         if result != 0:
             print(f"[ERROR] Failed to download {url} using system wget.")
     else:

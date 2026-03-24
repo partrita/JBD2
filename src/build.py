@@ -3,7 +3,7 @@ import shutil
 import subprocess
 import sys
 import zipfile
-from typing import NoReturn
+import concurrent.futures
 
 from .config import (
     BUILT_FONTS_PATH,
@@ -29,7 +29,7 @@ if not USE_SYSTEM_WGET:
 
 def print_usage() -> None:
     """Print the usage instructions for this script."""
-    print(f"Usage: python -m src.build <subcommand>\n")
+    print("Usage: python -m src.build <subcommand>\n")
     print("Available subcommands:")
     print("    all    : Automatically setup environment and build fonts.")
     print("    setup  : Download source font files and extract them.")
@@ -60,25 +60,25 @@ def setup() -> None:
     """Download and prepare the source font files."""
     print("[INFO] Starting setup...")
 
-    # Download required font archives.
-    download_file(ENGLISH_FONT_URL, ENGLISH_FONT_ZIP_NAME)
-    download_file(KOREAN_FONT_URL, KOREAN_FONT_ZIP_NAME)
-    download_file(ENGLISH_FONT_NF_URL, ENGLISH_FONT_NF_ZIP_NAME)
-
     os.makedirs(DOWNLOAD_PATH, exist_ok=True)
 
-    # Move downloaded files to the assets directory.
-    archives = [
-        ENGLISH_FONT_ZIP_NAME,
-        KOREAN_FONT_ZIP_NAME,
-        ENGLISH_FONT_NF_ZIP_NAME,
+    archives_info = [
+        (ENGLISH_FONT_URL, os.path.join(DOWNLOAD_PATH, ENGLISH_FONT_ZIP_NAME)),
+        (KOREAN_FONT_URL, os.path.join(DOWNLOAD_PATH, KOREAN_FONT_ZIP_NAME)),
+        (ENGLISH_FONT_NF_URL, os.path.join(DOWNLOAD_PATH, ENGLISH_FONT_NF_ZIP_NAME)),
     ]
-    for archive in archives:
-        shutil.move(archive, os.path.join(DOWNLOAD_PATH, archive))
 
-    # Extract all archives.
-    for archive in archives:
-        extract_zip(os.path.join(DOWNLOAD_PATH, archive), DOWNLOAD_PATH)
+    # Concurrently download font archives directly to DOWNLOAD_PATH.
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(download_file, url, path) for url, path in archives_info]
+        for future in concurrent.futures.as_completed(futures):
+            future.result()
+
+    # Concurrently extract all archives.
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(extract_zip, path, DOWNLOAD_PATH) for _, path in archives_info]
+        for future in concurrent.futures.as_completed(futures):
+            future.result()
 
     # Cleanup: remove non-Regular fonts and unnecessary files from downloads.
     print("[INFO] Cleaning up downloaded files...")

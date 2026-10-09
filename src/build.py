@@ -12,6 +12,7 @@ from .config import (
     ENGLISH_FONT_NF_ZIP_NAME,
     ENGLISH_FONT_URL,
     ENGLISH_FONT_ZIP_NAME,
+    KOREAN_FONT_PATH,
     KOREAN_FONT_URL,
     KOREAN_FONT_ZIP_NAME,
     USE_SYSTEM_WGET,
@@ -38,15 +39,17 @@ def print_usage() -> None:
 
 
 def download_file(url: str, filename: str) -> None:
-    """Download a file from a URL using wget or the system's wget command."""
+    """Download a file. Raises RuntimeError on failure."""
     print(f"[INFO] Downloading {filename}...")
     if USE_SYSTEM_WGET:
         result = subprocess.run(["wget", "-q", url, "-O", filename]).returncode
         if result != 0:
-            print(f"[ERROR] Failed to download {url} using system wget.")
+            raise RuntimeError(f"Failed to download {url} using system wget.")
     else:
         wget.download(url, out=filename)
         print()  # Add newline after wget progress bar
+    if not os.path.exists(filename) or not zipfile.is_zipfile(filename):
+        raise RuntimeError(f"Download failed or produced invalid archive: {filename}")
 
 
 def extract_zip(zip_path: str, extract_to: str) -> None:
@@ -54,6 +57,35 @@ def extract_zip(zip_path: str, extract_to: str) -> None:
     print(f"[INFO] Extracting {os.path.basename(zip_path)}...")
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
         zip_ref.extractall(extract_to)
+
+
+def _prune_downloads() -> None:
+    """Keep only files needed for the merge.
+
+    Keeps: standard D2Coding Regular TTF (KOREAN_FONT_PATH), OFL.txt,
+    and Regular TTFs from other families. Removes Bold/Ligature/TTC files
+    to save disk space and keep later scans fast.
+    """
+    keep_d2 = os.path.abspath(KOREAN_FONT_PATH)
+    for root, _, files in os.walk(DOWNLOAD_PATH):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if file == "OFL.txt":
+                continue
+            if os.path.abspath(file_path) == keep_d2:
+                continue
+            if file.endswith(".ttc"):
+                os.remove(file_path)
+                continue
+            if not file.endswith(".ttf"):
+                continue
+            # Drop unused D2Coding variants (Bold / ligature).
+            if "D2Coding" in file:
+                os.remove(file_path)
+                continue
+            # Drop non-Regular styles from other families.
+            if "Regular" not in file:
+                os.remove(file_path)
 
 
 def setup() -> None:
@@ -68,38 +100,22 @@ def setup() -> None:
         (ENGLISH_FONT_NF_URL, os.path.join(DOWNLOAD_PATH, ENGLISH_FONT_NF_ZIP_NAME)),
     ]
 
-    # Concurrently download font archives directly to DOWNLOAD_PATH.
+    # Remove stale archives so a failed download never looks valid.
     for _, path in archives_info:
         if os.path.exists(path):
             os.remove(path)
 
+    # Download concurrently; download_file() already validates each archive.
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_to_path = {executor.submit(download_file, url, path): path for url, path in archives_info}
-        for future in concurrent.futures.as_completed(future_to_path):
-            future.result()
-            archive_path = future_to_path[future]
-            if not os.path.exists(archive_path) or not zipfile.is_zipfile(archive_path):
-                raise RuntimeError(f"Download failed or produced invalid archive: {archive_path}")
+        list(executor.map(lambda item: download_file(*item), archives_info))
 
-    # Concurrently extract all archives.
+    # Extract concurrently.
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(extract_zip, path, DOWNLOAD_PATH) for _, path in archives_info]
-        for future in concurrent.futures.as_completed(futures):
-            future.result()
+        list(executor.map(lambda path: extract_zip(path, DOWNLOAD_PATH), [p for _, p in archives_info]))
 
     # Cleanup: remove non-Regular fonts and unnecessary files from downloads.
     print("[INFO] Cleaning up downloaded files...")
-    for root, _, files in os.walk(DOWNLOAD_PATH):
-        for file in files:
-            file_path = os.path.join(root, file)
-
-            # Keep D2Coding files.
-            if file.endswith(".ttf") and "D2Coding" in file:
-                continue
-
-            # Remove non-Regular fonts.
-            if file.endswith(".ttf") and "Regular" not in file:
-                os.remove(file_path)
+    _prune_downloads()
 
 
 def clean() -> None:

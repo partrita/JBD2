@@ -12,6 +12,15 @@
 
 -----
 
+## D2Coding 1.4.0 업데이트 반영
+
+- 한글 소스 폰트를 `naver/d2codingfont` VER1.3.2 (2018)에서 `naver/d2-coding-font` VER1.4.0 (2026-10-03)으로 교체했습니다. 공지: https://d2.naver.com/news/7193556 / 릴리즈: https://github.com/naver/d2-coding-font/releases/tag/VER1.4.0
+- JBD2는 표준(Standard) Regular TTF(`D2Coding-Ver1.4.0-20261003.ttf`)의 한글 영역만 합성합니다. Bold/Ligature/TTC는 빌드 시 제외됩니다.
+- 1.4.0 중 JBD2에 영향을 주는 수정은 전각폭 심볼 20종 정렬 수정과 베이스라인 힌팅 수정입니다. 합성 범위(`U+3131-U+318E`, `U+AC00-U+D7A3`), 한글 폭(1000), 베어링 조정(200)은 기존과 동일합니다.
+- dotted-zero(`cv01`) 같은 OpenType 옵션은 합성 대상이 아닙니다.
+
+-----
+
 ## 폰트 다운로드
 
 ![](./static/sample-invert.png)

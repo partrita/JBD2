@@ -18,20 +18,22 @@ USE_SYSTEM_WGET: Final[bool] = True
 # =======================================
 #  Korean Monospace Font (D2Coding) Configuration
 # =======================================
-KOREAN_FONT_VERSION: Final[str] = "1.3.2"
-KOREAN_FONT_RELEASE_DATE: Final[str] = "20180524"
+# D2Coding 1.4.0 (2026-10-03): https://d2.naver.com/news/7193556
+# Repo moved from naver/d2codingfont -> naver/d2-coding-font.
+# Zip layout: D2Coding/ (standard), D2CodingLigature/, D2CodingAll/, OFL.txt.
+# JBD2 merges Hangul glyphs from the standard Regular TTF only.
 KOREAN_FONT_URL: Final[str] = (
-    f"https://github.com/naver/d2codingfont/releases/download/VER{KOREAN_FONT_VERSION}/"
-    f"D2Coding-Ver{KOREAN_FONT_VERSION}-{KOREAN_FONT_RELEASE_DATE}.zip"
+    "https://github.com/naver/d2-coding-font/releases/download/VER1.4.0/"
+    "D2Coding-Ver1.4.0-20261003.zip"
 )
 KOREAN_FONT_ZIP_NAME: Final[str] = "D2_Coding.zip"
 KOREAN_FONT_WIDTH: Final[int] = 1000
 
-# Path to the original D2Coding TTF file after extraction.
+# Path to the standard Regular TTF after extraction.
 KOREAN_FONT_PATH: Final[str] = os.path.join(
     DOWNLOAD_PATH,
     "D2Coding",
-    f"D2Coding-Ver{KOREAN_FONT_VERSION}-{KOREAN_FONT_RELEASE_DATE}.ttf",
+    "D2Coding-Ver1.4.0-20261003.ttf",
 )
 
 

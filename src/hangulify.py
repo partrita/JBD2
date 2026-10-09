@@ -1,3 +1,5 @@
+"""Merge D2Coding Hangul glyphs into JetBrains Mono (plain + Nerd Font)."""
+
 import os
 from typing import Any, List, Tuple
 
@@ -14,6 +16,17 @@ from .config import (
 # Value to adjust the side bearings of the glyphs.
 BEARING_ADJUSTMENT: int = 200
 
+# Hangul Jamo (U+3131-U+318E) and Hangul Syllables (U+AC00-U+D7A3).
+HANGUL_RANGES: Tuple[Tuple[int, int], ...] = ((0x3131, 0x318E), (0xAC00, 0xD7A3))
+
+
+def select_hangul(font: fontforge.font) -> None:
+    """Select all Hangul glyphs merged from D2Coding."""
+    start, end = HANGUL_RANGES[0]
+    font.selection.select(("unicode", "ranges"), start, end)
+    for start, end in HANGUL_RANGES[1:]:
+        font.selection.select(("unicode", "ranges", "more"), start, end)
+
 
 def adjust_glyph_bearing(glyph: Any, adjustment: int) -> None:
     """Adjust the left and right side bearings of a glyph."""
@@ -21,45 +34,42 @@ def adjust_glyph_bearing(glyph: Any, adjustment: int) -> None:
     glyph.right_side_bearing = (adjustment // 2) + int(glyph.right_side_bearing)
 
 
+def _has_d2_width(glyph: Any) -> bool:
+    return int(glyph.width) == KOREAN_FONT_WIDTH
+
+
 def process_hangul_glyphs(font: fontforge.font) -> None:
-    """Select Korean glyphs and adjust their bearings."""
-    # Unicode ranges for Hangul Jamo and Syllables.
-    font.selection.select(("unicode", "ranges"), 0x3131, 0x318E)
-    font.selection.select(("unicode", "ranges", "more"), 0xAC00, 0xD7A3)
+    """Adjust bearings of Hangul glyphs so they align with JetBrains Mono."""
+    select_hangul(font)
 
     for glyph in font.selection.byGlyphs:
-        is_korean_font = int(glyph.width) == KOREAN_FONT_WIDTH
-
         if not glyph.references:
-            if is_korean_font:
+            if _has_d2_width(glyph):
                 adjust_glyph_bearing(glyph, BEARING_ADJUSTMENT)
-        else:
-            for ref in glyph.references:
-                ref_glyph = font[ref[0]]
-                is_korean_font_ref = int(ref_glyph.width) == KOREAN_FONT_WIDTH
-                if is_korean_font_ref:
-                    adjust_glyph_bearing(ref_glyph, BEARING_ADJUSTMENT)
+            continue
+        for ref in glyph.references:
+            ref_glyph = font[ref[0]]
+            if _has_d2_width(ref_glyph):
+                adjust_glyph_bearing(ref_glyph, BEARING_ADJUSTMENT)
 
 
 def get_font_style(filename: str) -> str:
-    """Extract font style (e.g., Bold, Italic) from the filename."""
+    """Extract font style (e.g., Bold, Regular) from the filename."""
     base_name = os.path.splitext(filename)[0]
     if "Regular" in base_name:
         return "Regular"
-
     # Assume styles are separated by '-' (e.g., 'JetBrainsMono-Bold.ttf').
-    style_parts = base_name.split("-")
-    return style_parts[-1] if len(style_parts) > 1 else "Regular"
+    return base_name.split("-")[-1] or "Regular"
 
 
 def format_style_name(style: str) -> str:
     """Format style name (e.g., 'BoldItalic' -> 'Bold Italic')."""
-    formatted: List[str] = []
+    chars: List[str] = []
     for i, char in enumerate(style):
         if char.isupper() and i > 0 and not style[i - 1].isupper():
-            formatted.append(" ")
-        formatted.append(char)
-    return "".join(formatted).strip()
+            chars.append(" ")
+        chars.append(char)
+    return "".join(chars).strip()
 
 
 def update_font_metadata(font: fontforge.font, style: str, is_nerd_font: bool) -> None:
@@ -116,49 +126,43 @@ def generate_font_files(font: fontforge.font, style: str) -> None:
 def process_font_file(font_path: str, is_nerd_font: bool, d2_font: fontforge.font) -> None:
     """Merge Hangul glyphs into a single English font file and update its metadata."""
     font = fontforge.open(font_path)
+    try:
+        if is_nerd_font:
+            fix_nerd_font_mappings(font)
 
-    if is_nerd_font:
-        fix_nerd_font_mappings(font)
+        # Clipboard already holds Hangul glyphs copied once in build_fonts().
+        select_hangul(font)
+        font.paste()
 
-    # Re-select the Hangul ranges in d2_font and copy them to ensure clipboard is fresh.
-    d2_font.selection.select(("unicode", "ranges"), 0x3131, 0x318E)
-    d2_font.selection.select(("unicode", "ranges", "more"), 0xAC00, 0xD7A3)
-    d2_font.copy()
-
-    # Re-select the Hangul ranges and paste the copied glyphs from D2Coding.
-    font.selection.select(("unicode", "ranges"), 0x3131, 0x318E)
-    font.selection.select(("unicode", "ranges", "more"), 0xAC00, 0xD7A3)
-    font.paste()
-
-    style = get_font_style(os.path.basename(font_path))
-    update_font_metadata(font, style, is_nerd_font)
-
-    generate_font_files(font, style)
-    font.close()
+        style = get_font_style(os.path.basename(font_path))
+        update_font_metadata(font, style, is_nerd_font)
+        generate_font_files(font, style)
+    finally:
+        font.close()
 
 
 def build_fonts() -> None:
-    """Main process: Process D2Coding font and merge it with JetBrains Mono files."""
+    """Process D2Coding font and merge it with JetBrains Mono files."""
     os.makedirs(BUILT_FONTS_PATH, exist_ok=True)
 
-    # Open D2Coding and prepare Hangul glyphs.
     d2_font = fontforge.open(KOREAN_FONT_PATH)
-    process_hangul_glyphs(d2_font)
+    try:
+        process_hangul_glyphs(d2_font)
 
-    # Define directories to scan for fonts to merge.
-    fonts_to_process: List[Tuple[str, bool]] = [
-        (ENGLISH_FONT_PATH, False),
-        (ENGLISH_FONT_NF_PATH, True),
-    ]
+        # Copy once and reuse for every target font (avoids N reselections).
+        select_hangul(d2_font)
+        d2_font.copy()
 
-    for dir_path, is_nerd_font in fonts_to_process:
-        if not os.path.exists(dir_path):
-            print(f"[WARNING] Directory not found: {dir_path}. Skipping.")
-            continue
-
-        for filename in os.listdir(dir_path):
-            if filename.lower().endswith(".ttf"):
-                full_path = os.path.join(dir_path, filename)
-                process_font_file(full_path, is_nerd_font, d2_font)
-
-    d2_font.close()
+        fonts_to_process: List[Tuple[str, bool]] = [
+            (ENGLISH_FONT_PATH, False),
+            (ENGLISH_FONT_NF_PATH, True),
+        ]
+        for dir_path, is_nerd_font in fonts_to_process:
+            if not os.path.exists(dir_path):
+                print(f"[WARNING] Directory not found: {dir_path}. Skipping.")
+                continue
+            for filename in sorted(os.listdir(dir_path)):
+                if filename.lower().endswith(".ttf"):
+                    process_font_file(os.path.join(dir_path, filename), is_nerd_font, d2_font)
+    finally:
+        d2_font.close()

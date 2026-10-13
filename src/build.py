@@ -63,8 +63,9 @@ def _prune_downloads() -> None:
     """Keep only files needed for the merge.
 
     Keeps: standard D2Coding Regular TTF (KOREAN_FONT_PATH), OFL.txt,
-    and Regular TTFs from other families. Removes Bold/Ligature/TTC files
-    to save disk space and keep later scans fast.
+    and standard Regular TTFs (JetBrainsMono-Regular.ttf, JetBrainsMonoNerdFont-Regular.ttf).
+    Removes Bold/Ligature/TTC files and non-standard variants (NL, Mono, Propo)
+    to save disk space and prevent unwanted output overwrites.
     """
     keep_d2 = os.path.abspath(KOREAN_FONT_PATH)
     for root, _, files in os.walk(DOWNLOAD_PATH):
@@ -86,6 +87,11 @@ def _prune_downloads() -> None:
             # Drop non-Regular styles from other families.
             if "Regular" not in file:
                 os.remove(file_path)
+                continue
+            # Drop NL (No-Ligatures), Propo, and NerdFontMono variants.
+            if "NL" in file or "Propo" in file or "NerdFontMono" in file:
+                os.remove(file_path)
+                continue
 
 
 def setup() -> None:

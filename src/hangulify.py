@@ -91,13 +91,12 @@ def update_font_metadata(font: fontforge.font, style: str, is_nerd_font: bool) -
 def fix_nerd_font_mappings(font: fontforge.font) -> None:
     """Fix specific glyph mapping issues in Nerd Fonts (e.g., heart icon)."""
     try:
-        if "heart" in font:
-            font.selection.select(0xF08D0)
-            font.copy()
-            font.selection.select(0x2665)
-            font.paste()
-            font.selection.select(0xF08D0)
-            font.clear()
+        if "heart" in font and 0xF08D0 in font:
+            src = font[0xF08D0]
+            dst = font.createChar(0x2665)
+            dst.foreground = src.foreground
+            dst.width = src.width
+            src.clear()
             print("[INFO] Fixed 'heart' glyph mapping.")
     except Exception as e:
         print(f"[WARNING] Could not fix 'heart' glyph mapping: {e}")
@@ -127,12 +126,13 @@ def process_font_file(font_path: str, is_nerd_font: bool, d2_font: fontforge.fon
     """Merge Hangul glyphs into a single English font file and update its metadata."""
     font = fontforge.open(font_path)
     try:
-        if is_nerd_font:
-            fix_nerd_font_mappings(font)
-
-        # Clipboard already holds Hangul glyphs copied once in build_fonts().
+        # Guarantee clipboard has Hangul glyphs from D2Coding
+        d2_font.copy()
         select_hangul(font)
         font.paste()
+
+        if is_nerd_font:
+            fix_nerd_font_mappings(font)
 
         style = get_font_style(os.path.basename(font_path))
         update_font_metadata(font, style, is_nerd_font)

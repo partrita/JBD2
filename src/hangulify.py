@@ -76,16 +76,46 @@ def update_font_metadata(font: fontforge.font, style: str, is_nerd_font: bool) -
     """Update font metadata (family name, font name, style, etc.)."""
     family_name: str = "JBD2NF" if is_nerd_font else "JBD2"
     formatted_style: str = format_style_name(style)
+    full_name: str = f"{family_name} {formatted_style}"
+    ps_name: str = f"{family_name}-{style}"
+    unique_id: str = f"{family_name}-{style}"
 
     font.familyname = family_name
-    font.fontname = f"{family_name}-{style}"
-    font.fullname = f"{family_name} {formatted_style}"
+    font.fontname = ps_name
+    font.fullname = full_name
+    font.fondname = family_name
 
-    # Add SFNT names for compatibility across platforms.
-    font.appendSFNTName("English (US)", "Preferred Family", family_name)
+    # Clear out any existing name records that conflict with the new family/full name,
+    # or that Mac Font Book might prioritize (e.g., Preferred Family, WWS Family, etc.)
+    conflicting_ids = {
+        "Family",
+        "SubFamily",
+        "Fullname",
+        "PostScriptName",
+        "UniqueID",
+        "Preferred Family",
+        "Preferred Subfamily",
+        "Compatible Full",
+        "WWS Family",
+        "WWS Subfamily",
+        1, 2, 3, 4, 6, 16, 17, 18, 21, 22,
+    }
+    font.sfnt_names = tuple(
+        entry for entry in font.sfnt_names
+        if entry[1] not in conflicting_ids and "JetBrains" not in str(entry[2])
+    )
+
+    # Add SFNT names for compatibility across platforms (macOS Font Book, Windows, Linux).
     font.appendSFNTName("English (US)", "Family", family_name)
-    font.appendSFNTName("English (US)", "Compatible Full", font.fullname)
     font.appendSFNTName("English (US)", "SubFamily", formatted_style)
+    font.appendSFNTName("English (US)", "Fullname", full_name)
+    font.appendSFNTName("English (US)", "PostScriptName", ps_name)
+    font.appendSFNTName("English (US)", "UniqueID", unique_id)
+    font.appendSFNTName("English (US)", "Preferred Family", family_name)
+    font.appendSFNTName("English (US)", "Preferred Subfamily", formatted_style)
+    font.appendSFNTName("English (US)", "Compatible Full", full_name)
+    font.appendSFNTName("English (US)", "WWS Family", family_name)
+    font.appendSFNTName("English (US)", "WWS Subfamily", formatted_style)
 
 
 def fix_nerd_font_mappings(font: fontforge.font) -> None:

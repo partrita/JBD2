@@ -111,11 +111,11 @@ def update_font_metadata(font: fontforge.font, style: str, is_nerd_font: bool) -
     font.appendSFNTName("English (US)", "Fullname", full_name)
     font.appendSFNTName("English (US)", "PostScriptName", ps_name)
     font.appendSFNTName("English (US)", "UniqueID", unique_id)
-    font.appendSFNTName("English (US)", "Preferred Family", family_name)
-    font.appendSFNTName("English (US)", "Preferred Subfamily", formatted_style)
-    font.appendSFNTName("English (US)", "Compatible Full", full_name)
-    font.appendSFNTName("English (US)", "WWS Family", family_name)
-    font.appendSFNTName("English (US)", "WWS Subfamily", formatted_style)
+    font.appendSFNTName("English (US)", 16, family_name)
+    font.appendSFNTName("English (US)", 17, formatted_style)
+    font.appendSFNTName("English (US)", 18, full_name)
+    font.appendSFNTName("English (US)", 21, family_name)
+    font.appendSFNTName("English (US)", 22, formatted_style)
 
 
 def fix_nerd_font_mappings(font: fontforge.font) -> None:
